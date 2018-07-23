@@ -9,6 +9,12 @@ import java.io.*;
 
 import java.util.regex.Pattern;
 
+//new
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 
 import com.lab.model.Interpreter;
 import org.springframework.stereotype.Repository;
@@ -86,25 +92,62 @@ public class InterpreterDAO {
 				//JSONParser parser = new JSONParser();
 				String outputtranslator = "";
 				
+				//El formato de consulta bueno
+				//https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&dt=bd&q=gate&ie=UTF-8&oe=UTF-8&dj=1&source=icon&tk=467103.467103
 				
 				msg = URLEncoder.encode(msg, "UTF-8");
 				URL url = new URL("http://translate.googleapis.com/translate_a/single?client=gtx&sl=" + sourceLang + "&tl="
-				+ targetLang + "&dt=t&q=" + msg + "&ie=UTF-8&oe=UTF-8");
+				+ targetLang + "&dt=t"  + "&dt=bd"  + "&dj=1&source=icon" +    "&q="  + msg + "&ie=UTF-8&oe=UTF-8");
+				//+ "&dt=bd&dt=ss&dt=ex"
+
+				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+				System.out.println(url);
+				System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+
 
 				URLConnection uc = url.openConnection();
 				uc.setRequestProperty("User-Agent", "Mozilla/5.0"); 
 				
-				
+				//new
+				StringBuilder sb = new StringBuilder();
+
 				BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream(), "UTF-8"));
+
+				
+
 				while ((inputLine = in.readLine()) != null) {
 					translated = translated + inputLine;
+					sb.append(inputLine);
+					
+					
 				}
+				//new
+				
+				JSONObject json = (JSONObject) new JSONParser().parse(translated);
+				System.out.println("\n");
+				System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx");
+				System.out.println(json.get("sentences").toString());
+				System.out.println(json.get("dict").toString());
+
+				ArrayList<String> list = (ArrayList<String>)json.get("sentences");
+				ArrayList<String> list2 = (ArrayList<String>)json.get("dict");
+				System.out.println("\n");
+				System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXx");
+				System.out.println("\n");
+				System.out.println("Contenido list: " + list);
+				System.out.println("Contenido list2: " + list2);
+				
+
+				
+
+				System.out.println("Valor de translated: " + translated);
 					
 				String aresult[] = translated.split(",");	
 		
 				
 				System.out.println("ESP: " + aresult[0].replace("\"","").replace("[",""));
 				System.out.println("ENG: " + aresult[1].replace("\"",""));
+			
 				
 				
 				finalTranslation = aresult[0].replace("\"","").replace("[","");
@@ -114,6 +157,8 @@ public class InterpreterDAO {
 				
 			} catch (IOException e) {
 				e.printStackTrace();
+			}   catch (ParseException e) {
+            e.printStackTrace();
         }   
     
 			
